@@ -32,11 +32,6 @@
         <move todir="${target.dir}/php-${runtime.php.version}/ext/appserver">
             <fileset dir="${target.dir}/appserver-${runtime.ext-appserver.version}"/>
         </move>
-        <!-- prepare PECL memcached sources sources for static compilation -->
-        <untar src="${lib.dir}/memcached-${runtime.memcached.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <move todir="${target.dir}/php-${runtime.php.version}/ext/memcached">
-            <fileset dir="${target.dir}/memcached-${runtime.memcached.version}"/>
-        </move>
         <!-- prepare PECL pthread sources for static compilation -->
         <untar src="${lib.dir}/pthreads-${runtime.pthreads.version}.tgz" dest="${target.dir}" compression="gzip"/>
         <move todir="${target.dir}/php-${runtime.php.version}/ext/pthreads">
@@ -47,20 +42,10 @@
         <move todir="${target.dir}/php-${runtime.php.version}/ext/apcu">
             <fileset dir="${target.dir}/apcu-${runtime.apcu.version}"/>
         </move>
-        <!-- prepare PECL operator sources for static compilation -->
-        <untar src="${lib.dir}/operator-${runtime.operator.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <move todir="${target.dir}/php-${runtime.php.version}/ext/operator">
-            <fileset dir="${target.dir}/operator-${runtime.operator.version}"/>
-        </move>
         <!-- prepare PECL pecl_http sources for static compilation -->
         <untar src="${lib.dir}/pecl_http-${runtime.pecl_http.version}.tgz" dest="${target.dir}" compression="gzip"/>
         <move todir="${target.dir}/php-${runtime.php.version}/ext/http">
             <fileset dir="${target.dir}/pecl_http-${runtime.pecl_http.version}"/>
-        </move>
-        <!-- prepare PECL AOP sources for static compilation -->
-        <untar src="${lib.dir}/AOP-${runtime.AOP.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <move todir="${target.dir}/php-${runtime.php.version}/ext/AOP">
-            <fileset dir="${target.dir}/AOP-${runtime.AOP.version}"/>
         </move>
         <!-- prepare PECL libevent sources for static compilation -->
         <untar src="${lib.dir}/libevent-${runtime.libevent.version}.tgz" dest="${target.dir}" compression="gzip"/>
@@ -121,23 +106,6 @@
         </exec>
         <exec dir="${target.dir}/freetype-${libfreetype.version}" executable="make"/>
         <exec dir="${target.dir}/freetype-${libfreetype.version}" executable="make">
-            <arg value="install"/>
-        </exec>
-    </target>
-
-    <!-- ==================================================================== -->
-    <!-- Prepares the libmemcached sources for the runtime                    -->
-    <!-- ==================================================================== -->
-    <target name="build-libmemcached" if="${libmemcached.build}" description="Prepares the libmemcached sources for the runtime.">
-        <untar src="${lib.dir}/libmemcached-${libmemcached.version}.tar.gz" dest="${target.dir}" compression="gzip"/>
-        <chmod perm="755" dir="${target.dir}/libmemcached-${libmemcached.version}/build-aux" includes="**/*"/>
-        <exec dir="${target.dir}/libmemcached-${libmemcached.version}" executable="sh">
-            <env key="CC" value="${libmemcached.cc}"/>
-            <arg value="configure"/>
-            <arg value="--prefix=${runtime.compile.prefix}"/>
-        </exec>
-        <exec dir="${target.dir}/libmemcached-${libmemcached.version}" executable="make"/>
-        <exec dir="${target.dir}/libmemcached-${libmemcached.version}" executable="make">
             <arg value="install"/>
         </exec>
     </target>
@@ -246,6 +214,23 @@
     </target>
 
     <!-- ==================================================================== -->
+    <!-- Prepares the libxml2 sources for the runtime                         -->
+    <!-- ==================================================================== -->
+    <target name="build-libxml2" if="${libxml2.build}" description="Prepares the libxml2 sources for the runtime.">
+        <untar src="${lib.dir}/libxml2-${libxml2.version}.tar.gz" dest="${target.dir}" compression="gzip"/>
+        <chmod perm="755" dir="${target.dir}/libxml2-${libxml2.version}" includes="install-sh"/>
+        <exec dir="${target.dir}/libxml2-${libxml2.version}" executable="sh">
+            <arg value="configure"/>
+            <arg value="--prefix=${runtime.compile.prefix}"/>
+            <arg value="--without-python"/>
+        </exec>
+        <exec dir="${target.dir}/libxml2-${libxml2.version}" executable="make"/>
+        <exec dir="${target.dir}/libxml2-${libxml2.version}" executable="make">
+            <arg value="install"/>
+        </exec>
+    </target>
+
+    <!-- ==================================================================== -->
     <!-- Copies the os.family + os.distribution specific buildfiles           -->
     <!-- into the dist                                                        -->
     <!-- ==================================================================== -->
@@ -293,13 +278,13 @@
         <antcall target="build-libjpeg"/>
         <antcall target="build-libpng"/>
         <antcall target="build-libfreetype"/>
-        <antcall target="build-libmemcached"/>
         <antcall target="build-libmcrypt"/>
         <antcall target="build-readline"/>
         <antcall target="build-libevent"/>
         <antcall target="build-openssl"/>
         <antcall target="build-pcre"/>
         <antcall target="build-libicu"/>
+        <antcall target="build-libxml2"/>
 
         <!-- prepare the PECL extensions -->
         <antcall target="prepare-pecl-extension"/>
@@ -409,22 +394,6 @@
     </target>
 
     <!-- ==================================================================== -->
-    <!-- Builds the PECL operator as shared extension                         -->
-    <!-- ==================================================================== -->
-    <target name="pecl-build-operator" description="Builds the PECL operator as shared extension.">
-        <untar src="${lib.dir}/operator-${runtime.operator.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <exec dir="${target.dir}/operator-${runtime.operator.version}" executable="${runtime.compile.prefix}/bin/phpize"/>
-        <exec dir="${target.dir}/operator-${runtime.operator.version}" executable="sh">
-            <arg value="configure"/>
-            <arg value="--with-php-config=${runtime.compile.prefix}/bin/php-config"/>
-        </exec>
-        <exec dir="${target.dir}/operator-${runtime.operator.version}" executable="make"/>
-        <exec dir="${target.dir}/operator-${runtime.operator.version}" executable="make">
-            <arg value="install"/>
-        </exec>
-    </target>
-
-    <!-- ==================================================================== -->
     <!-- Builds the PECL pecl_http as shared extension                         -->
     <!-- ==================================================================== -->
     <target name="pecl-build-pecl_http" description="Builds the PECL pecl_http as shared extension.">
@@ -502,22 +471,6 @@
         </exec>
         <exec dir="${target.dir}/ev-${runtime.ev.version}" executable="make"/>
         <exec dir="${target.dir}/ev-${runtime.ev.version}" executable="make">
-            <arg value="install"/>
-        </exec>
-    </target>
-
-    <!-- ==================================================================== -->
-    <!-- Builds the PECL AOP as shared extension                         -->
-    <!-- ==================================================================== -->
-    <target name="pecl-build-AOP" description="Builds the PECL AOP as shared extension.">
-        <untar src="${lib.dir}/AOP-${runtime.AOP.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <exec dir="${target.dir}/AOP-${runtime.AOP.version}" executable="${runtime.compile.prefix}/bin/phpize"/>
-        <exec dir="${target.dir}/AOP-${runtime.AOP.version}" executable="sh">
-            <arg value="configure"/>
-            <arg value="--with-php-config=${runtime.compile.prefix}/bin/php-config"/>
-        </exec>
-        <exec dir="${target.dir}/AOP-${runtime.AOP.version}" executable="make"/>
-        <exec dir="${target.dir}/AOP-${runtime.AOP.version}" executable="make">
             <arg value="install"/>
         </exec>
     </target>
