@@ -32,11 +32,6 @@
     <!-- Prepares the PECL sources for static compilation (not active!!)      -->
     <!-- ==================================================================== -->
     <target name="prepare-pecl-extension" description="Prepares the PECL sources for static compilation (not active!!)">
-        <!-- prepare php ext appserver sources sources for static compilation -->
-        <untar src="${lib.dir}/ext-appserver-${runtime.ext-appserver.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <move todir="${target.dir}/php-${runtime.php.version}/ext/appserver">
-            <fileset dir="${target.dir}/appserver-${runtime.ext-appserver.version}"/>
-        </move>
         <!-- prepare PECL pthread sources for static compilation -->
         <untar src="${lib.dir}/pthreads-${runtime.pthreads.version}.tgz" dest="${target.dir}" compression="gzip"/>
         <move todir="${target.dir}/php-${runtime.php.version}/ext/pthreads">
@@ -51,11 +46,6 @@
         <untar src="${lib.dir}/pecl_http-${runtime.pecl_http.version}.tgz" dest="${target.dir}" compression="gzip"/>
         <move todir="${target.dir}/php-${runtime.php.version}/ext/http">
             <fileset dir="${target.dir}/pecl_http-${runtime.pecl_http.version}"/>
-        </move>
-        <!-- prepare PECL AOP sources for static compilation -->
-        <untar src="${lib.dir}/AOP-${runtime.AOP.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <move todir="${target.dir}/php-${runtime.php.version}/ext/AOP">
-            <fileset dir="${target.dir}/AOP-${runtime.AOP.version}"/>
         </move>
         <!-- prepare PECL libevent sources for static compilation -->
         <untar src="${lib.dir}/libevent-${runtime.libevent.version}.tgz" dest="${target.dir}" compression="gzip"/>
@@ -167,7 +157,6 @@
         <!-- build the PECL package's as shared library -->
         <antcall target="pecl-build-pthreads"/>
         <antcall target="pecl-build-redis"/>
-        <antcall target="pecl-build-appserver"/>
         <antcall target="pecl-build-apcu"/>
         <antcall target="pecl-build-ev"/>
         <antcall target="pecl-build-event"/>
@@ -317,24 +306,6 @@
     </target>
 
     <!-- ==================================================================== -->
-    <!-- Builds the PECL AOP as shared extension                         -->
-    <!-- ==================================================================== -->
-    <target name="pecl-build-AOP" description="Builds the PECL AOP as shared extension.">
-        <untar src="${lib.dir}/AOP-${runtime.AOP.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <exec dir="${target.dir}/AOP-${runtime.AOP.version}" executable="${runtime.compile.prefix}/bin/phpize"/>
-        <exec dir="${target.dir}/AOP-${runtime.AOP.version}" executable="sh">
-            <arg value="configure"/>
-            <arg value="--with-php-config=${runtime.compile.prefix}/bin/php-config"/>
-        </exec>
-        <exec dir="${target.dir}/AOP-${runtime.AOP.version}" executable="make">
-            <arg value="-j2"/>
-        </exec>
-        <exec dir="${target.dir}/AOP-${runtime.AOP.version}" executable="make">
-            <arg value="install"/>
-        </exec>
-    </target>
-
-    <!-- ==================================================================== -->
     <!-- Builds the PECL xdebug as shared extension                           -->
     <!-- ==================================================================== -->
     <target name="pecl-build-xdebug" description="Builds the PECL xdebug as shared extension.">
@@ -366,24 +337,6 @@
             <arg value="-j2"/>
         </exec>
         <exec dir="${target.dir}/redis-${runtime.redis.version}" executable="make">
-            <arg value="install"/>
-        </exec>
-    </target>
-
-    <!-- ==================================================================== -->
-    <!-- Builds the PECL appserver as shared extension                        -->
-    <!-- ==================================================================== -->
-    <target name="pecl-build-appserver" description="Builds the PECL appserver as shared extension.">
-        <untar src="${lib.dir}/ext-appserver-${runtime.ext-appserver.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <exec dir="${target.dir}/appserver-${runtime.ext-appserver.version}" executable="${runtime.compile.prefix}/bin/phpize"/>
-        <exec dir="${target.dir}/appserver-${runtime.ext-appserver.version}" executable="sh">
-            <arg value="configure"/>
-            <arg value="--with-php-config=${runtime.compile.prefix}/bin/php-config"/>
-        </exec>
-        <exec dir="${target.dir}/appserver-${runtime.ext-appserver.version}" executable="make">
-            <arg value="-j2"/>
-        </exec>
-        <exec dir="${target.dir}/appserver-${runtime.ext-appserver.version}" executable="make">
             <arg value="install"/>
         </exec>
     </target>
