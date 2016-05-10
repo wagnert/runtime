@@ -47,11 +47,6 @@
         <move todir="${target.dir}/php-${runtime.php.version}/ext/apcu">
             <fileset dir="${target.dir}/apcu-${runtime.apcu.version}"/>
         </move>
-        <!-- prepare PECL operator sources for static compilation -->
-        <untar src="${lib.dir}/operator-${runtime.operator.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <move todir="${target.dir}/php-${runtime.php.version}/ext/operator">
-            <fileset dir="${target.dir}/operator-${runtime.operator.version}"/>
-        </move>
         <!-- prepare PECL pecl_http sources for static compilation -->
         <untar src="${lib.dir}/pecl_http-${runtime.pecl_http.version}.tgz" dest="${target.dir}" compression="gzip"/>
         <move todir="${target.dir}/php-${runtime.php.version}/ext/http">
@@ -225,24 +220,6 @@
             <arg value="-j2"/>
         </exec>
         <exec dir="${target.dir}/apcu-${runtime.apcu.version}" executable="make">
-            <arg value="install"/>
-        </exec>
-    </target>
-
-    <!-- ==================================================================== -->
-    <!-- Builds the PECL operator as shared extension                         -->
-    <!-- ==================================================================== -->
-    <target name="pecl-build-operator" description="Builds the PECL operator as shared extension.">
-        <untar src="${lib.dir}/operator-${runtime.operator.version}.tgz" dest="${target.dir}" compression="gzip"/>
-        <exec dir="${target.dir}/operator-${runtime.operator.version}" executable="${runtime.compile.prefix}/bin/phpize"/>
-        <exec dir="${target.dir}/operator-${runtime.operator.version}" executable="sh">
-            <arg value="configure"/>
-            <arg value="--with-php-config=${runtime.compile.prefix}/bin/php-config"/>
-        </exec>
-        <exec dir="${target.dir}/operator-${runtime.operator.version}" executable="make">
-            <arg value="-j2"/>
-        </exec>
-        <exec dir="${target.dir}/operator-${runtime.operator.version}" executable="make">
             <arg value="install"/>
         </exec>
     </target>
